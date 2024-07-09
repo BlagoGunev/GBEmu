@@ -1,4 +1,5 @@
 #include <bus.h>
+#include <cart.h>
 
 // 0000	3FFF	16 KiB ROM bank 00	From cartridge, usually a fixed bank
 // 4000	7FFF	16 KiB ROM Bank 01–NN	From cartridge, switchable bank via mapper (if any)
@@ -14,10 +15,19 @@
 // FFFF	FFFF	Interrupt Enable register (IE)	
 
 u8 bus_read(u16 address) {
-    
+    if (address < 0x8000) {
+        // Read from cartridge
+        return cart_read(address);
+    }
+
+    NO_IMPL
 }
 
 void bus_write(u16 address, u8 value) {
-
+    if (address < 0x8000) {
+        // Write to cartridge
+        cart_write(address, value);
+        return;
+    }
 }
 
