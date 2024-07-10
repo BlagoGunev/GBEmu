@@ -1,6 +1,7 @@
 #pragma once
 
 #include <common.h>
+#include <instructions.h>
 
 // AF	A	-	Accumulator & Flags
 // BC	B	C	BC
@@ -28,6 +29,7 @@ typedef struct {
     u16 fetch_data;
     u16 mem_dest;
     u8 cur_opcode;
+    instruction *cur_inst;
 
     bool halted;
     bool stepping;
