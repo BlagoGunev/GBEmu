@@ -29,5 +29,7 @@ void bus_write(u16 address, u8 value) {
         cart_write(address, value);
         return;
     }
+
+    NO_IMPL
 }
 
