@@ -14,3 +14,11 @@ instruction instructions[0x100] = {
 
     [0xC3] = {INST_JP, AM_D16}
 };
+
+instruction *instruction_by_opcode(u8 opcode) {
+    if (instructions[opcode].type == INST_NONE) {
+        return NULL;
+    }
+
+    return &instructions[opcode];
+}

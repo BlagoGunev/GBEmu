@@ -119,3 +119,5 @@ typedef struct {
     cond_type cond;
     u8 param;
 } instruction;
+
+instruction *instruction_by_opcode(u8 opcode);

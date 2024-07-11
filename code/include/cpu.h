@@ -26,8 +26,9 @@ typedef struct {
 typedef struct {
     cpu_registers regs;
 
-    u16 fetch_data;
+    u16 fetched_data;
     u16 mem_dest;
+    bool dest_is_mem;
     u8 cur_opcode;
     instruction *cur_inst;
 
