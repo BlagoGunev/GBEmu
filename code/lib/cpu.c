@@ -5,7 +5,7 @@
 cpu_context ctx = {0};
 
 void cpu_init() {
-
+    ctx.regs.pc = 0x100;
 }
 
 static void fetch_instruction() {
@@ -14,7 +14,7 @@ static void fetch_instruction() {
     ctx.cur_inst = instruction_by_opcode(ctx.cur_opcode);
 
     if (ctx.cur_inst == NULL) {
-        printf("Unknown instruction: %02X", ctx.cur_opcode);
+        printf("Unknown instruction: %02X\n", ctx.cur_opcode);
         exit(-7);
     }
 }
@@ -46,6 +46,7 @@ static void fetch_data() {
             ctx.fetched_data = lo | (hi << 8);
 
             ctx.regs.pc += 2;
+            return;
         }
 
         default:
@@ -56,7 +57,8 @@ static void fetch_data() {
 }
 
 static void execute() {
-    printf("Not executing yet...\n");
+    printf("Executing: %02X   PC: %04X\n", ctx.cur_opcode, ctx.regs.pc);
+    printf("\tNot executing yet...\n");
 }
 
 bool cpu_step() {
@@ -67,5 +69,5 @@ bool cpu_step() {
         execute();
     }
 
-    return false;
+    return true;
 }
