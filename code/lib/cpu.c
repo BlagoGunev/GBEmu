@@ -1,5 +1,6 @@
 #include <cpu.h>
 #include <bus.h>
+#include <emu.h>
 
 cpu_context ctx = {0};
 
@@ -12,7 +13,7 @@ static void fetch_instruction() {
     ctx.regs.pc++;
     ctx.cur_inst = instruction_by_opcode(ctx.cur_opcode);
 
-    if (ctx.cur_inst->type == NULL) {
+    if (ctx.cur_inst == NULL) {
         printf("Unknown instruction: %02X", ctx.cur_opcode);
         exit(-7);
     }
@@ -26,7 +27,7 @@ static void fetch_data() {
         case AM_IMP: return;
 
         case AM_R: 
-            ctx.fetched_data = cpu_red_reg(ctx.cur_inst->reg_1);
+            ctx.fetched_data = cpu_read_reg(ctx.cur_inst->reg_1);
             return;
 
         case AM_R_D8:
