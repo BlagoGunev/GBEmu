@@ -6,11 +6,11 @@ static bool check_cond(cpu_context *ctx) {
     bool c = CPU_FLAG_C;
 
     switch (ctx->cur_inst->cond) {
-        CT_NONE: return true;
-        CT_C: return c;
-        CT_NC: return !c;
-        CT_Z: return z;
-        CT_NZ: return !z;
+        case CT_NONE: return true;
+        case CT_C: return c;
+        case CT_NC: return !c;
+        case CT_Z: return z;
+        case CT_NZ: return !z;
 
         default: return false;
     }
