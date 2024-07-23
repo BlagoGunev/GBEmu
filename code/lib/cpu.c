@@ -58,7 +58,13 @@ static void fetch_data() {
 
 static void execute() {
     printf("Executing: %02X   PC: %04X\n", ctx.cur_opcode, ctx.regs.pc);
-    printf("\tNot executing yet...\n");
+    INST_PROC proc = inst_get_processor(ctx.cur_inst->type);
+
+    if (!proc) {
+        NO_IMPL
+    }
+
+    proc(&ctx);
 }
 
 bool cpu_step() {
