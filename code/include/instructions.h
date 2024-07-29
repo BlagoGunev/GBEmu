@@ -3,6 +3,7 @@
 #include <common.h>
 
 typedef enum {
+    AM_IMP, // implied
     AM_R_D16, // DEST <- SRC
     AM_R_R,
     AM_MR_R,
@@ -18,7 +19,6 @@ typedef enum {
     AM_HL_SPR,
     AM_D16,
     AM_D8,
-    AM_IMP, // implied
     AM_D16_R,
     AM_MR_D8,
     AM_MR,
