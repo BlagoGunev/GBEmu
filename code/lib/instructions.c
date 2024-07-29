@@ -2,7 +2,7 @@
 #include <instructions.h>
 
 instruction instructions[0x100] = {
-    [0x00] = {INST_NOP, AM_IMP},
+    [0x00] = {INST_NOP},
 
     [0x05] = {INST_DEC, AM_R, RT_B},
 
@@ -12,13 +12,11 @@ instruction instructions[0x100] = {
 
     [0xAF] = {INST_XOR, AM_R, RT_A},
 
-    [0xC3] = {INST_JP, AM_D16}
+    [0xC3] = {INST_JP, AM_D16},
+
+    [0xF3] = {INST_DI}
 };
 
 instruction *instruction_by_opcode(u8 opcode) {
-    if (instructions[opcode].type == INST_NONE) {
-        return NULL;
-    }
-
     return &instructions[opcode];
 }

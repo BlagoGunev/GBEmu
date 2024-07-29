@@ -34,6 +34,8 @@ typedef struct {
 
     bool halted;
     bool stepping;
+
+    bool int_master_enabled;
     
 } cpu_context;
 
@@ -44,6 +46,7 @@ void cpu_init();
 bool cpu_step();
 
 u16 cpu_read_reg(reg_type rt);
+void cpu_set_flags(cpu_context *ctx, char z, char n, char h, char c);
 
 typedef void (* INST_PROC)(cpu_context *);
 INST_PROC inst_get_processor(inst_type type);

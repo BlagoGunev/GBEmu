@@ -37,12 +37,40 @@ static void proc_jp(cpu_context *ctx) {
     }
 }
 
+static void proc_di(cpu_context *ctx) {
+    ctx->int_master_enabled = false;
+}
+
+static void proc_xor(cpu_context *ctx) {
+    ctx->regs.a ^= ctx->fetched_data & 0xFF;
+    cpu_set_flags(ctx, ctx->regs.a, 0, 0, 0);
+}
+
+void cpu_set_flags(cpu_context *ctx, char z, char n, char h, char c) {
+    if (z != -1) {
+        BIT_SET(ctx->regs.f, 7, z);
+    }
+
+    if (n != -1) {
+        BIT_SET(ctx->regs.f, 6, n);
+    }
+
+    if (h != -1) {
+        BIT_SET(ctx->regs.f, 5, h);
+    }
+
+    if (c != -1) {
+        BIT_SET(ctx->regs.f, 4, c);
+    }
+}
+
 static INST_PROC processors[] = {
     [INST_NONE] = proc_none,
     [INST_NOP] = proc_nop,
     [INST_LD] = proc_ld,
-    [INST_JP] = proc_jp
-
+    [INST_JP] = proc_jp,
+    [INST_DI] = proc_di,
+    [INST_XOR] = proc_xor
 };
 
 INST_PROC inst_get_processor(inst_type type) {
