@@ -3,6 +3,7 @@
 
 instruction instructions[0x100] = {
     [0x00] = {INST_NOP},
+    [0x01] = {INST_LD, AM_R_D16, RT_BC},
 
     [0x05] = {INST_DEC, AM_R, RT_B},
 
