@@ -34,8 +34,9 @@ bool cpu_step() {
         fetch_instruction();
         fetch_data();
 
-        printf("Executing: %02X,   PC: %04X, Data (%02X %02X), Fetched: %04X\n\tA: %02X, F: %02X\n", ctx.cur_opcode, pc, bus_read(pc+1), bus_read(pc+2), 
-            ctx.fetched_data, cpu_read_reg(RT_A), cpu_read_reg(RT_F));
+        printf("Executing: %02X,   PC: %04X, Data (%02X %02X), Fetched: %04X\n\tA: %02X, F: %02X, BC: %02X%02X, DE: %02X%02X, HL: %02X%02X\n", 
+            ctx.cur_opcode, pc, bus_read(pc+1), bus_read(pc+2), 
+            ctx.fetched_data, ctx.regs.a, ctx.regs.f, ctx.regs.b, ctx.regs.c, ctx.regs.d, ctx.regs.e, ctx.regs.h, ctx.regs.l);
         
         if (ctx.cur_inst == NULL) {
             printf("Unknown instruction: %02X\n", ctx.cur_opcode);

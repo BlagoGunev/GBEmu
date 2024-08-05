@@ -57,6 +57,16 @@ static void proc_ld(cpu_context *ctx) {
     cpu_set_reg(ctx->cur_inst->reg_1, ctx->fetched_data);
 }
 
+static void proc_ldh(cpu_context *ctx) {
+    if (ctx->cur_inst->reg_1 == RT_A) {
+        cpu_set_reg(RT_A, bus_read(0xFF00 | ctx->fetched_data));
+    } else {
+        bus_write(ctx->mem_dest, ctx->regs.a);
+    }
+
+    emu_cycles(1);
+}
+
 static void proc_jp(cpu_context *ctx) {
     if (check_cond(ctx)) {
         ctx->regs.pc = ctx->fetched_data;
@@ -95,6 +105,7 @@ static INST_PROC processors[] = {
     [INST_NONE] = proc_none,
     [INST_NOP] = proc_nop,
     [INST_LD] = proc_ld,
+    [INST_LDH] = proc_ldh,
     [INST_JP] = proc_jp,
     [INST_DI] = proc_di,
     [INST_XOR] = proc_xor
