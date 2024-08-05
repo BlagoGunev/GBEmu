@@ -59,7 +59,38 @@ void bus_write(u16 address, u8 value) {
     if (address < 0x8000) {
         // Write to cartridge
         cart_write(address, value);
+    } else if (address < 0xA000) {
+        // VRAM
+        printf("UNSUPPORTED bus_write(%04X)\n", address);
+        NO_IMPL
+    } else if (address < 0xC000) {
+        // Cartridge RAM
+        cart_write(address, value);
+    } else if (address < 0xE000) {
+        // WRAM
+        wram_write(address, value);
+    } else if (address < 0xFE00) {
+        // Echo RAM, unusable
         return;
+    } else if (address < 0xFEA0) {
+        // OAM
+        // TODO
+        printf("UNSUPPORTED bus_write(%04X)\n", address);
+        NO_IMPL
+    } else if (address < 0xFF00) {
+        // Prohibited
+    } else if (address < 0xFF80) {
+        // IO Registers
+        // TODO
+        printf("UNSUPPORTED bus_write(%04X)\n", address);
+        NO_IMPL
+    } else if (address < 0xFFFF) {
+        // HRAM
+        hram_write(address, value);
+    } else if (address == 0xFFFF) {
+        // IE register
+        // TODO
+        NO_IMPL
     }
     
     printf("UNSUPPORTED bus_write(%04X)\n", address);
