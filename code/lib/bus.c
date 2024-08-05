@@ -16,12 +16,43 @@
 
 u8 bus_read(u16 address) {
     if (address < 0x8000) {
-        // Read from cartridge
+        // ROM data
         return cart_read(address);
+    } else if (address < 0xA000) {
+        // VRAM
+        // TODO
+        printf("UNSUPPORTED bus_read(%04X)\n", address);
+        NO_IMPL
+    } else if (address < 0xC000) {
+        // Cartridge RAM
+        return cart_read(address);
+    } else if (address < 0xE000) {
+        // WRAM
+        return wram_read(address);
+    } else if (address < 0xFE00) {
+        // Echo RAM, unusable
+        return 0;
+    } else if (address < 0xFEA0) {
+        // OAM
+        // TODO
+        printf("UNSUPPORTED bus_read(%04X)\n", address);
+        NO_IMPL
+    } else if (address < 0xFF00) {
+        // Prohibited
+        return 0;
+    } else if (address < 0xFF80) {
+        // IO Registers
+        // TODO
+        printf("UNSUPPORTED bus_read(%04X)\n", address);
+        NO_IMPL
+    } else if (address == 0xFFFF) {
+        // Interrupt Enable register
+        printf("UNSUPPORTED bus_read(%04X)\n", address);
+        NO_IMPL
     }
 
-    printf("UNSUPPORTED bus_read(%04X)\n", address);
-    // NO_IMPL
+    // 0xFF80 - 0xFFFE
+    return hram_read(address);
 }
 
 void bus_write(u16 address, u8 value) {
