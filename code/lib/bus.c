@@ -1,5 +1,6 @@
 #include <bus.h>
 #include <cart.h>
+#include <ram.h>
 
 // 0000	3FFF	16 KiB ROM bank 00	From cartridge, usually a fixed bank
 // 4000	7FFF	16 KiB ROM Bank 01–NN	From cartridge, switchable bank via mapper (if any)
@@ -92,9 +93,6 @@ void bus_write(u16 address, u8 value) {
         // TODO
         NO_IMPL
     }
-    
-    printf("UNSUPPORTED bus_write(%04X)\n", address);
-    // NO_IMPL
 }
 
 u16 bus_read16(u16 address) {
