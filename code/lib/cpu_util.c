@@ -49,3 +49,11 @@ void cpu_set_reg(reg_type rt, u16 val) {
         case RT_PC: ctx.regs.pc = val; break;
     }
 }
+
+u8 cpu_get_ie_register() {
+    return ctx.ie_register;
+}
+
+void cpu_set_ie_register(u8 n) {
+    ctx.ie_register = n;
+}
