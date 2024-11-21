@@ -23,27 +23,33 @@ instruction instructions[0x100] = {
 
     [0x16] = {INST_LD, AM_R_D8, RT_D},
 
+    [0x18] = {INST_JR, AM_D8},
+
     [0x1A] = {INST_LD, AM_R_MR, RT_A, RT_DE},
 
     [0x1E] = {INST_LD, AM_R_D8, RT_E},
 
     // 0x2X
-
+    [0x20] = {INST_JR, AM_D8, RT_NONE, RT_NONE, CT_NZ},
     [0x21] = {INST_LD, AM_R_D16, RT_HL},
     [0x22] = {INST_LD, AM_HLI_R, RT_HL, RT_A},
 
     [0x26] = {INST_LD, AM_R_D8, RT_H},
+
+    [0x28] = {INST_JR, AM_D8, RT_NONE, RT_NONE, CT_Z},
 
     [0x2A] = {INST_LD, AM_R_HLI, RT_A, RT_HL},
 
     [0x2E] = {INST_LD, AM_R_D8, RT_L},
 
     // 0x3X
-
+    [0x30] = {INST_JR, AM_D8, RT_NONE, RT_NONE, CT_NC},
     [0x31] = {INST_LD, AM_R_D16, RT_SP},
     [0x32] = {INST_LD, AM_HLD_R, RT_HL, RT_A},
 
     [0x36] = {INST_LD, AM_MR_D8, RT_HL},
+
+    [0x38] = {INST_JR, AM_D8, RT_NONE, RT_NONE, CT_C},
 
     [0x3A] = {INST_LD, AM_R_HLD, RT_A, RT_HL},
 
@@ -125,20 +131,47 @@ instruction instructions[0x100] = {
 
     [0xAF] = {INST_XOR, AM_R, RT_A},
 
+    // 0xCX
+
+    [0xC1] = {INST_POP, AM_R, RT_BC},
+    [0xC2] = {INST_JP, AM_D16, RT_NONE, RT_NONE, CT_NZ},
     [0xC3] = {INST_JP, AM_D16},
+    [0xC4] = {INST_CALL, AM_D16, RT_NONE, RT_NONE, CT_NZ},
+    [0xC5] = {INST_PUSH, AM_R, RT_BC},
+
+    [0xCA] = {INST_JP, AM_D16, RT_NONE, RT_NONE, CT_Z},
+
+    [0xCC] = {INST_CALL, AM_D16, RT_NONE, RT_NONE, CT_Z},
+    [0xCD] = {INST_CALL, AM_D16},
+
+    // 0xDX
+
+    [0xD1] = {INST_POP, AM_R, RT_DE},
+    [0xD2] = {INST_JP, AM_D16, RT_NONE, RT_NONE, CT_NC},
+    [0xD4] = {INST_CALL, AM_D16, RT_NONE, RT_NONE, CT_NC},
+    [0xD5] = {INST_PUSH, AM_R, RT_DE},
+
+    [0xDA] = {INST_JP, AM_D16, RT_NONE, RT_NONE, CT_C},
+
+    [0xDC] = {INST_CALL, AM_D16, RT_NONE, RT_NONE, CT_C},
 
     // 0xEX
     [0xE0] = {INST_LDH, AM_A8_R, RT_NONE, RT_A},
-
+    [0xE1] = {INST_POP, AM_R, RT_HL},
     [0xE2] = {INST_LD, AM_MR_R, RT_C, RT_A},
+    [0xE5] = {INST_PUSH, AM_R, RT_HL},
+
+    [0xE9] = {INST_JP, AM_MR, RT_HL},
 
     [0xEA] = {INST_LD, AM_A16_R, RT_NONE, RT_A},
 
     // 0xFX
     [0xF0] = {INST_LDH, AM_R_A8, RT_A},
-
+    [0xF1] = {INST_POP, AM_R, RT_AF},
     [0xF2] = {INST_LD, AM_R_MR, RT_A, RT_C},
     [0xF3] = {INST_DI},
+
+    [0xF5] = {INST_PUSH, AM_R, RT_AF},
 
     [0xF8] = {INST_LD, AM_HL_SPR, RT_HL},
     [0xF9] = {INST_LD, AM_R_R, RT_SP, RT_HL},
