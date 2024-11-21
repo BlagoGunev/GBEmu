@@ -46,6 +46,8 @@ typedef struct {
 void cpu_init();
 bool cpu_step();
 
+cpu_registers *cpu_get_regs();
+
 u16 cpu_read_reg(reg_type rt);
 void cpu_set_reg(reg_type rt, u16 val);
 void cpu_set_flags(cpu_context *ctx, char z, char n, char h, char c);

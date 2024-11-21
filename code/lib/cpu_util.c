@@ -6,6 +6,10 @@ u16 reverse(u16 n) {
     return ((n & 0x00FF) << 8) | ((n & 0xFF00) >> 8);
 }
 
+cpu_registers *cpu_get_regs() {
+    return &ctx.regs;
+}
+
 u16 cpu_read_reg(reg_type rt) {
     switch(rt) {
         case RT_A: return ctx.regs.a;
