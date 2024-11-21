@@ -132,28 +132,40 @@ instruction instructions[0x100] = {
     [0xAF] = {INST_XOR, AM_R, RT_A},
 
     // 0xCX
-
+    [0xC0] = {INST_RET, AM_IMP, RT_NONE, RT_NONE, CT_NZ},
     [0xC1] = {INST_POP, AM_R, RT_BC},
     [0xC2] = {INST_JP, AM_D16, RT_NONE, RT_NONE, CT_NZ},
     [0xC3] = {INST_JP, AM_D16},
     [0xC4] = {INST_CALL, AM_D16, RT_NONE, RT_NONE, CT_NZ},
     [0xC5] = {INST_PUSH, AM_R, RT_BC},
 
+    [0xC7] = {INST_RST, AM_IMP, RT_NONE, RT_NONE, CT_NONE, 0x00},
+    [0xC8] = {INST_RET, AM_IMP, RT_NONE, RT_NONE, CT_Z},
+    [0xC9] = {INST_RET},
+
     [0xCA] = {INST_JP, AM_D16, RT_NONE, RT_NONE, CT_Z},
 
     [0xCC] = {INST_CALL, AM_D16, RT_NONE, RT_NONE, CT_Z},
     [0xCD] = {INST_CALL, AM_D16},
 
-    // 0xDX
+    [0xCF] = {INST_RST, AM_IMP, RT_NONE, RT_NONE, CT_NONE, 0x08},
 
+    // 0xDX
+    [0xD0] = {INST_RET, AM_IMP, RT_NONE, RT_NONE, CT_NC},
     [0xD1] = {INST_POP, AM_R, RT_DE},
     [0xD2] = {INST_JP, AM_D16, RT_NONE, RT_NONE, CT_NC},
     [0xD4] = {INST_CALL, AM_D16, RT_NONE, RT_NONE, CT_NC},
     [0xD5] = {INST_PUSH, AM_R, RT_DE},
 
+    [0xD7] = {INST_RST, AM_IMP, RT_NONE, RT_NONE, CT_NONE, 0x10},
+    [0xD8] = {INST_RET, AM_IMP, RT_NONE, RT_NONE, CT_C},
+    [0xD9] = {INST_RETI},
+
     [0xDA] = {INST_JP, AM_D16, RT_NONE, RT_NONE, CT_C},
 
     [0xDC] = {INST_CALL, AM_D16, RT_NONE, RT_NONE, CT_C},
+
+    [0xDF] = {INST_RST, AM_IMP, RT_NONE, RT_NONE, CT_NONE, 0x18},
 
     // 0xEX
     [0xE0] = {INST_LDH, AM_A8_R, RT_NONE, RT_A},
@@ -161,9 +173,13 @@ instruction instructions[0x100] = {
     [0xE2] = {INST_LD, AM_MR_R, RT_C, RT_A},
     [0xE5] = {INST_PUSH, AM_R, RT_HL},
 
+    [0xE7] = {INST_RST, AM_IMP, RT_NONE, RT_NONE, CT_NONE, 0x20},
+
     [0xE9] = {INST_JP, AM_MR, RT_HL},
 
     [0xEA] = {INST_LD, AM_A16_R, RT_NONE, RT_A},
+
+    [0xEF] = {INST_RST, AM_IMP, RT_NONE, RT_NONE, CT_NONE, 0x28},
 
     // 0xFX
     [0xF0] = {INST_LDH, AM_R_A8, RT_A},
@@ -173,9 +189,12 @@ instruction instructions[0x100] = {
 
     [0xF5] = {INST_PUSH, AM_R, RT_AF},
 
+    [0xF7] = {INST_RST, AM_IMP, RT_NONE, RT_NONE, CT_NONE, 0x30},
     [0xF8] = {INST_LD, AM_HL_SPR, RT_HL},
     [0xF9] = {INST_LD, AM_R_R, RT_SP, RT_HL},
-    [0xFA] = {INST_LD, AM_R_A16, RT_A}
+    [0xFA] = {INST_LD, AM_R_A16, RT_A},
+
+    [0xFF] = {INST_RST, AM_IMP, RT_NONE, RT_NONE, CT_NONE, 0x38}
 
 };
 

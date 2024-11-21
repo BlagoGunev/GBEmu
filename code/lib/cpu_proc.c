@@ -75,7 +75,7 @@ static void goto_addr(cpu_context *ctx, u16 addr, bool pushpc) {
             stack_push16(ctx->regs.pc);
         }
 
-        ctx->regs.pc = ctx->fetched_data;
+        ctx->regs.pc = addr;
         emu_cycles(1);
     }
 }
@@ -92,6 +92,33 @@ static void proc_jr(cpu_context *ctx) {
 
 static void proc_call(cpu_context *ctx) {
     goto_addr(ctx, ctx->fetched_data, true);
+}
+
+static void proc_ret(cpu_context *ctx) {
+    if (ctx->cur_inst->cond != CT_NONE) {
+        emu_cycles(1);
+    }
+
+    if (check_cond(ctx)) {
+        u16 lo = stack_pop();
+        emu_cycles(1);
+        u16 hi = stack_pop();
+        emu_cycles(1);
+
+        u16 n = (hi << 8) | lo;
+        ctx->regs.pc = n;
+
+        emu_cycles(1);
+    }
+}
+
+static void proc_reti(cpu_context *ctx) {
+    ctx->int_master_enabled = true;
+    proc_ret(ctx);
+}
+
+static void proc_rst(cpu_context *ctx) {
+    goto_addr(ctx, ctx->cur_inst->param, true);
 }
 
 static void proc_pop(cpu_context *ctx) {
@@ -157,6 +184,9 @@ static INST_PROC processors[] = {
     [INST_JP] = proc_jp,
     [INST_JR] = proc_jr,
     [INST_CALL] = proc_call,
+    [INST_RET] = proc_ret,
+    [INST_RETI] = proc_reti,
+    [INST_RST] = proc_rst,
     [INST_POP] = proc_pop,
     [INST_PUSH] = proc_push,
     [INST_DI] = proc_di,
