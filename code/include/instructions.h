@@ -66,7 +66,7 @@ typedef enum {
     // x9
     INST_RETI,
     // xB
-    INST_PREFIX,
+    INST_CB,
     INST_EI,
     // xD
     INST_DEC,
@@ -75,7 +75,7 @@ typedef enum {
     INST_RRA,
     INST_CPL,
     INST_CCF,
-    // Prefix
+    // Prefix CB
     INST_RLC,
     INST_RL,
     INST_SLA,

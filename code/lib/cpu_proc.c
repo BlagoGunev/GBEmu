@@ -23,6 +23,25 @@ static bool is_16_bit_reg(reg_type rt) {
     return rt >= RT_AF;
 }
 
+reg_type reg_lookup[] = {
+    RT_B,
+    RT_C,
+    RT_D,
+    RT_E,
+    RT_H,
+    RT_L,
+    RT_HL,
+    RT_A
+};
+
+reg_type decode_reg(u8 reg) {
+    if (reg > 0x7) {
+        return RT_NONE;
+    }
+
+    return reg_lookup[reg];
+}
+
 static void proc_none(cpu_context *ctx) {
     printf("Invalid instruction! Exiting...\n");
     exit(-7);
@@ -125,6 +144,109 @@ static void proc_rst(cpu_context *ctx) {
     goto_addr(ctx, ctx->cur_inst->param, true);
 }
 
+static void proc_cb(cpu_context *ctx) {
+    u8 op = ctx->fetched_data;
+    reg_type reg = decode_reg(op & 0x7);
+    u8 reg_val = cpu_read_reg8(reg);
+    u8 bit = (op >> 3) & 0x3;
+    u8 bit_op = (op >> 6) & 0x3;
+
+    emu_cycles(1);
+
+    if (reg == RT_HL) {
+        emu_cycles(2);
+    }
+
+    switch(bit_op) {
+        case 1:
+            // BIT
+            cpu_set_flags(ctx, !BIT(reg_val, 0), 0, 1, -1);
+            return;
+        case 2: 
+            // RST
+            reg_val &= ~(1 << bit);
+            cpu_set_reg8(reg, reg_val);
+            return;
+        case 3:
+            // SET
+            reg_val |= (1 << bit);
+            cpu_set_reg8(reg, reg_val);
+            return;
+    }
+
+    bool flagC = CPU_FLAG_C;
+
+    switch (bit) {
+        case 0: {
+            // RLC
+            bool setC = BIT(reg_val, 7);
+            u8 result = ((reg_val << 1) & 0xFF) | setC;
+            cpu_set_reg8(reg, result);
+            cpu_set_flags(ctx, result == 0, 0, 0, setC);
+        } return;
+
+        case 1: {
+            // RRC
+            u8 old = reg_val;
+            reg_val >>= 1;
+            reg_val |= (old << 7);
+            cpu_set_reg8(reg, reg_val);
+            cpu_set_flags(ctx, reg_val == 0, 0, 0, old & 1);
+        } return;
+
+        case 2: {
+            // RL
+            u8 old = reg_val;
+            reg_val <<= 1;
+            reg_val |= flagC;
+
+            cpu_set_reg8(reg, reg_val);
+            cpu_set_flags(ctx, reg_val == 0, 0, 0, !!(old & 0x80));
+        } return;
+
+        case 3: {
+            // RR
+            u8 old = reg_val;
+            reg_val >>= 1;
+            reg_val |= (flagC << 7);
+            cpu_set_reg8(reg, reg_val);
+            cpu_set_flags(ctx, reg_val == 0, 0, 0, old & 1);
+        } return;
+
+        case 4: {
+            // SLA
+            u8 old = reg_val;
+            reg_val <<= 1;
+            cpu_set_reg8(reg, reg_val);
+            cpu_set_flags(ctx, reg_val == 0, 0, 0, !!(old & 0x80));
+        } return;
+
+        case 5: {
+            // SRA
+            u8 u = (int8_t)reg_val >> 1;
+            cpu_set_reg8(reg, u);
+            cpu_set_flags(ctx, u == 0, 0, 0, reg_val & 1);
+        } return;
+
+        case 6: {
+            // SWAP
+            reg_val = ((reg_val & 0xF0) >> 4) | ((reg_val & 0xF) << 4);
+            cpu_set_reg8(reg, reg_val);
+            cpu_set_flags(ctx, reg_val == 0, 0, 0, 0);
+        } return;
+
+        case 7: {
+            // SRL
+            u8 u = reg_val >> 1;
+            cpu_set_reg8(reg, u);
+            cpu_set_flags(ctx, u == 0, 0, 0, reg_val & 1);
+        } return;
+    }
+
+    fprintf(stderr, "ERROR INCORRECT CB: %02X", op);
+    NO_IMPL
+}
+
 static void proc_pop(cpu_context *ctx) {
     u16 lo = stack_pop();
     emu_cycles(1);
@@ -157,9 +279,25 @@ static void proc_di(cpu_context *ctx) {
     ctx->int_master_enabled = false;
 }
 
+static void proc_and(cpu_context *ctx) {
+    ctx->regs.a &= ctx->fetched_data;
+    cpu_set_flags(ctx, ctx->regs.a == 0, 0, 1, 0);
+}
+
 static void proc_xor(cpu_context *ctx) {
     ctx->regs.a ^= ctx->fetched_data & 0xFF;
-    cpu_set_flags(ctx, ctx->regs.a, 0, 0, 0);
+    cpu_set_flags(ctx, ctx->regs.a == 0, 0, 0, 0);
+}
+
+static void proc_or(cpu_context *ctx) {
+    ctx->regs.a |= ctx->fetched_data & 0xFF;
+    cpu_set_flags(ctx, ctx->regs.a == 0, 0, 0, 0);
+}
+
+static void proc_cp(cpu_context *ctx) {
+    int n = (int)ctx->regs.a - (int)ctx->fetched_data;
+
+    cpu_set_flags(ctx, n == 0, 1, ((int)ctx->regs.a & 0x0F) - ((int)ctx->fetched_data & 0x0F) < 0, n < 0);
 }
 
 static void proc_inc(cpu_context *ctx) {
@@ -304,10 +442,14 @@ static INST_PROC processors[] = {
     [INST_RET] = proc_ret,
     [INST_RETI] = proc_reti,
     [INST_RST] = proc_rst,
+    [INST_CB] = proc_cb,
     [INST_POP] = proc_pop,
     [INST_PUSH] = proc_push,
     [INST_DI] = proc_di,
+    [INST_AND] = proc_and,
     [INST_XOR] = proc_xor,
+    [INST_OR] = proc_or,
+    [INST_CP] = proc_cp,
     [INST_INC] = proc_inc,
     [INST_DEC] = proc_dec,
     [INST_ADC] = proc_adc,
