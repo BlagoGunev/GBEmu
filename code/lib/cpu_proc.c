@@ -275,6 +275,42 @@ static void proc_push(cpu_context *ctx) {
     emu_cycles(1);
 }
 
+static void proc_rlca(cpu_context *ctx) {
+    u8 u = ctx->regs.a;
+    bool c = (u >> 7) & 1;
+    u = (u << 1) | c;
+
+    ctx->regs.a = u;
+    cpu_set_flags(ctx, 0, 0, 0, c);
+}
+
+static void proc_rrca(cpu_context *ctx) {
+    u8 u = ctx->regs.a;
+    bool c = u & 1;
+    u = (u >> 1) | (c << 7);
+
+    ctx->regs.a = u;
+    cpu_set_flags(ctx, 0, 0, 0, c);
+}
+
+static void proc_rla(cpu_context *ctx) {
+    u8 u = ctx->regs.a;
+    u8 cf = CPU_FLAG_C;
+    u8 c = (u >> 7) & 1;
+
+    ctx->regs.a = (u << 1) | cf;
+    cpu_set_flags(ctx, 0, 0, 0, c);
+}
+
+static void proc_rra(cpu_context *ctx) {
+    u8 u = ctx->regs.a;
+    u8 cf = CPU_FLAG_C;
+    u8 c = u & 1;
+
+    ctx->regs.a = (u >> 1) | (cf << 7);
+    cpu_set_flags(ctx, 0, 0, 0, c);
+}
+
 static void proc_di(cpu_context *ctx) {
     ctx->int_master_enabled = false;
 }
@@ -445,6 +481,10 @@ static INST_PROC processors[] = {
     [INST_CB] = proc_cb,
     [INST_POP] = proc_pop,
     [INST_PUSH] = proc_push,
+    [INST_RLCA] = proc_rlca,
+    [INST_RRCA] = proc_rrca,
+    [INST_RLA] = proc_rla,
+    [INST_RRA] = proc_rra,
     [INST_DI] = proc_di,
     [INST_AND] = proc_and,
     [INST_XOR] = proc_xor,
