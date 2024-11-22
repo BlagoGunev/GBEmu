@@ -6,53 +6,68 @@ instruction instructions[0x100] = {
     [0x00] = {INST_NOP},
     [0x01] = {INST_LD, AM_R_D16, RT_BC},
     [0x02] = {INST_LD, AM_MR_R, RT_BC, RT_A},
-
+    [0x03] = {INST_INC, AM_R, RT_BC},
+    [0x04] = {INST_INC, AM_R, RT_B},
     [0x05] = {INST_DEC, AM_R, RT_B},
     [0x06] = {INST_LD, AM_R_D8, RT_B},
 
     [0x08] = {INST_LD, AM_A16_R, RT_NONE, RT_SP},
 
     [0x0A] = {INST_LD, AM_R_MR, RT_A, RT_BC},
-
+    [0x0B] = {INST_DEC, AM_R, RT_BC},
+    [0x0C] = {INST_INC, AM_R, RT_C},
+    [0x0D] = {INST_DEC, AM_R, RT_C},
     [0x0E] = {INST_LD, AM_R_D8, RT_C},
     
     // 0x1X
 
     [0x11] = {INST_LD, AM_R_D16, RT_DE},
     [0x12] = {INST_LD, AM_MR_R, RT_DE, RT_A},
-
+    [0x13] = {INST_INC, AM_R, RT_DE},
+    [0x14] = {INST_INC, AM_R, RT_D},
+    [0x15] = {INST_DEC, AM_R, RT_D},
     [0x16] = {INST_LD, AM_R_D8, RT_D},
 
     [0x18] = {INST_JR, AM_D8},
 
     [0x1A] = {INST_LD, AM_R_MR, RT_A, RT_DE},
-
+    [0x1B] = {INST_DEC, AM_R, RT_DE},
+    [0x1C] = {INST_INC, AM_R, RT_E},
+    [0x1D] = {INST_DEC, AM_R, RT_E},
     [0x1E] = {INST_LD, AM_R_D8, RT_E},
 
     // 0x2X
     [0x20] = {INST_JR, AM_D8, RT_NONE, RT_NONE, CT_NZ},
     [0x21] = {INST_LD, AM_R_D16, RT_HL},
     [0x22] = {INST_LD, AM_HLI_R, RT_HL, RT_A},
-
+    [0x23] = {INST_INC, AM_R, RT_HL},
+    [0x24] = {INST_INC, AM_R, RT_H},
+    [0x25] = {INST_DEC, AM_R, RT_H},
     [0x26] = {INST_LD, AM_R_D8, RT_H},
 
     [0x28] = {INST_JR, AM_D8, RT_NONE, RT_NONE, CT_Z},
 
     [0x2A] = {INST_LD, AM_R_HLI, RT_A, RT_HL},
-
+    [0x2B] = {INST_DEC, AM_R, RT_HL},
+    [0x2C] = {INST_INC, AM_R, RT_L},
+    [0x2D] = {INST_DEC, AM_R, RT_L},
     [0x2E] = {INST_LD, AM_R_D8, RT_L},
 
     // 0x3X
     [0x30] = {INST_JR, AM_D8, RT_NONE, RT_NONE, CT_NC},
     [0x31] = {INST_LD, AM_R_D16, RT_SP},
     [0x32] = {INST_LD, AM_HLD_R, RT_HL, RT_A},
-
+    [0x33] = {INST_INC, AM_R, RT_SP},
+    [0x34] = {INST_INC, AM_MR, RT_HL},
+    [0x35] = {INST_DEC, AM_MR, RT_HL},
     [0x36] = {INST_LD, AM_MR_D8, RT_HL},
 
     [0x38] = {INST_JR, AM_D8, RT_NONE, RT_NONE, CT_C},
 
     [0x3A] = {INST_LD, AM_R_HLD, RT_A, RT_HL},
-
+    [0x3B] = {INST_DEC, AM_R, RT_SP},
+    [0x3C] = {INST_INC, AM_R, RT_A},
+    [0x3D] = {INST_DEC, AM_R, RT_A},
     [0x3E] = {INST_LD, AM_R_D8, RT_A},
 
     // 0x4X

@@ -19,6 +19,10 @@ static bool check_cond(cpu_context *ctx) {
     return false;
 }
 
+static bool is_16_bit_reg(reg_type rt) {
+    return rt >= RT_AF;
+}
+
 static void proc_none(cpu_context *ctx) {
     printf("Invalid instruction! Exiting...\n");
     exit(-7);
@@ -33,7 +37,7 @@ static void proc_ld(cpu_context *ctx) {
     if (ctx->dest_is_mem) {
         
         // if 16 bit register
-        if (ctx->cur_inst->reg_2 >= RT_AF) {
+        if (is_16_bit_reg(ctx->cur_inst->reg_2)) {
             bus_write16(ctx->mem_dest, ctx->fetched_data);
             emu_cycles(1);
         } else {
@@ -158,6 +162,51 @@ static void proc_xor(cpu_context *ctx) {
     cpu_set_flags(ctx, ctx->regs.a, 0, 0, 0);
 }
 
+static void proc_inc(cpu_context *ctx) {
+    u16 val = cpu_read_reg(ctx->cur_inst->reg_1) + 1;
+
+    if (is_16_bit_reg(ctx->cur_inst->reg_1)) {
+        emu_cycles(1);
+    }
+
+    if (ctx->cur_inst->reg_1 == RT_HL && ctx->cur_inst->mode == AM_MR) {
+        val = bus_read(cpu_read_reg(RT_HL)) + 1;
+        val &= 0xFF;
+        bus_write(cpu_read_reg(RT_HL), val);
+    } else {
+        cpu_set_reg(ctx->cur_inst->reg_1, val);
+        val = cpu_read_reg(ctx->cur_inst->reg_1);
+    }
+
+    if ((ctx->cur_opcode & 0x03) == 0x03) {
+        return;
+    }
+
+    cpu_set_flags(ctx, val == 0, 0, (val & 0x0F) == 0, -1);
+}
+
+static void proc_dec(cpu_context *ctx) {
+    u16 val = cpu_read_reg(ctx->cur_inst->reg_1) - 1;
+
+    if (is_16_bit_reg(ctx->cur_inst->reg_1)) {
+        emu_cycles(1);
+    }
+
+    if (ctx->cur_inst->reg_1 == RT_HL && ctx->cur_inst->mode == AM_MR) {
+        val = bus_read(cpu_read_reg(RT_HL)) - 1;
+        bus_write(cpu_read_reg(RT_HL), val);
+    } else {
+        cpu_set_reg(ctx->cur_inst->reg_1, val);
+        val = cpu_read_reg(ctx->cur_inst->reg_1);
+    }
+
+    if ((ctx->cur_opcode & 0x0B) == 0x0B) {
+        return;
+    }
+
+    cpu_set_flags(ctx, val == 0, 1, (val & 0x0F) == 0x0F, -1);
+}
+
 void cpu_set_flags(cpu_context *ctx, char z, char n, char h, char c) {
     if (z != -1) {
         BIT_SET(ctx->regs.f, 7, z);
@@ -190,7 +239,9 @@ static INST_PROC processors[] = {
     [INST_POP] = proc_pop,
     [INST_PUSH] = proc_push,
     [INST_DI] = proc_di,
-    [INST_XOR] = proc_xor
+    [INST_XOR] = proc_xor,
+    [INST_INC] = proc_inc,
+    [INST_DEC] = proc_dec
 };
 
 INST_PROC inst_get_processor(inst_type type) {
