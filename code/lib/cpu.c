@@ -1,6 +1,7 @@
 #include <cpu.h>
 #include <bus.h>
 #include <emu.h>
+#include <interrupts.h>
 
 cpu_context ctx = {0};
 
@@ -52,6 +53,21 @@ bool cpu_step() {
         }
 
         execute();
+    } else {
+        emu_cycles(1);
+
+        if (ctx.int_flags) {
+            ctx.halted = false;
+        }
+    }
+
+    if (ctx.int_master_enabled) {
+        cpu_handle_interrupts(&ctx);
+        ctx.enable_ime = false;
+    }
+
+    if (ctx.enable_ime) {
+        ctx.int_master_enabled = true;
     }
 
     return true;

@@ -38,6 +38,7 @@ typedef struct {
     bool int_master_enabled;
     bool enable_ime;
     u8 ie_register;
+    u8 int_flags;
     
 } cpu_context;
 
@@ -59,6 +60,9 @@ void cpu_set_flags(cpu_context *ctx, char z, char n, char h, char c);
 
 u8 cpu_get_ie_register();
 void cpu_set_ie_register(u8 n);
+
+u8 cpu_get_int_flags();
+void cpu_set_int_flags(u8 value);
 
 typedef void (* INST_PROC)(cpu_context *);
 INST_PROC inst_get_processor(inst_type type);
