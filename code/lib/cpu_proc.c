@@ -311,8 +311,52 @@ static void proc_rra(cpu_context *ctx) {
     cpu_set_flags(ctx, 0, 0, 0, c);
 }
 
+static void proc_stop(cpu_context *ctx) {
+    fprintf(stderr, "STOPPING!\n");
+    NO_IMPL
+}
+
+static void proc_daa(cpu_context *ctx) {
+    u8 u = 0;
+    int fc = 0;
+
+    if (CPU_FLAG_H || (!CPU_FLAG_N && (ctx->regs.a & 0xF) > 9)) {
+        u = 6;
+    }
+
+    if (CPU_FLAG_C || (!CPU_FLAG_N && ctx->regs.a > 0x99)) {
+        u |= 0x60;
+        fc = 1;
+    }
+    
+    ctx->regs.a += CPU_FLAG_N ? -u : u;
+
+    cpu_set_flags(ctx, ctx->regs.a == 0, -1, 0, fc);
+}
+
+static void proc_cpl(cpu_context *ctx) {
+    ctx->regs.a = ~ctx->regs.a;
+    cpu_set_flags(ctx, -1, 1, 1, -1);
+}
+
+static void proc_scf(cpu_context *ctx) {
+    cpu_set_flags(ctx, -1, 0, 0, 1);
+}
+
+static void proc_ccf(cpu_context *ctx) {
+    cpu_set_flags(ctx, -1, 0, 0, CPU_FLAG_C ^ 1);
+}
+
+static void proc_halt(cpu_context *ctx) {
+    ctx->halted = true;
+}
+
 static void proc_di(cpu_context *ctx) {
     ctx->int_master_enabled = false;
+}
+
+static void proc_ei(cpu_context *ctx) {
+    ctx->enable_ime = true;
 }
 
 static void proc_and(cpu_context *ctx) {
@@ -485,7 +529,14 @@ static INST_PROC processors[] = {
     [INST_RRCA] = proc_rrca,
     [INST_RLA] = proc_rla,
     [INST_RRA] = proc_rra,
+    [INST_STOP] = proc_stop,
+    [INST_DAA] = proc_daa,
+    [INST_CPL] = proc_cpl,
+    [INST_SCF] = proc_scf,
+    [INST_CCF] = proc_ccf,
+    [INST_HALT] = proc_halt,
     [INST_DI] = proc_di,
+    [INST_EI] = proc_ei,
     [INST_AND] = proc_and,
     [INST_XOR] = proc_xor,
     [INST_OR] = proc_or,

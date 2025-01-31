@@ -36,11 +36,14 @@ typedef struct {
     bool stepping;
 
     bool int_master_enabled;
+    bool enable_ime;
     u8 ie_register;
     
 } cpu_context;
 
 #define CPU_FLAG_Z BIT(ctx->regs.f, 7)
+#define CPU_FLAG_N BIT(ctx->regs.f, 6)
+#define CPU_FLAG_H BIT(ctx->regs.f, 5)
 #define CPU_FLAG_C BIT(ctx->regs.f, 4)
 
 void cpu_init();
