@@ -24,7 +24,8 @@ u8 bus_read(u16 address) {
         // VRAM
         // TODO
         printf("UNSUPPORTED bus_read(%04X)\n", address);
-        NO_IMPL
+        // NO_IMPL
+        return 0;
     } else if (address < 0xC000) {
         // Cartridge RAM
         return cart_read(address);
@@ -38,7 +39,8 @@ u8 bus_read(u16 address) {
         // OAM
         // TODO
         printf("UNSUPPORTED bus_read(%04X)\n", address);
-        NO_IMPL
+        // NO_IMPL
+        return 0;
     } else if (address < 0xFF00) {
         // Prohibited
         return 0;
@@ -47,6 +49,7 @@ u8 bus_read(u16 address) {
         // TODO
         printf("UNSUPPORTED bus_read(%04X)\n", address);
         //NO_IMPL
+        return 0;
     } else if (address == 0xFFFF) {
         // Interrupt Enable register
         return cpu_get_ie_register();
@@ -63,7 +66,7 @@ void bus_write(u16 address, u8 value) {
     } else if (address < 0xA000) {
         // VRAM
         printf("UNSUPPORTED bus_write(%04X)\n", address);
-        NO_IMPL
+        // NO_IMPL
     } else if (address < 0xC000) {
         // Cartridge RAM
         cart_write(address, value);
@@ -77,14 +80,14 @@ void bus_write(u16 address, u8 value) {
         // OAM
         // TODO
         printf("UNSUPPORTED bus_write(%04X)\n", address);
-        NO_IMPL
+        // NO_IMPL
     } else if (address < 0xFF00) {
         // Prohibited
     } else if (address < 0xFF80) {
         // IO Registers
         // TODO
         printf("UNSUPPORTED bus_write(%04X)\n", address);
-        NO_IMPL
+        // NO_IMPL
     } else if (address < 0xFFFF) {
         // HRAM
         hram_write(address, value);
