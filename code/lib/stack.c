@@ -3,7 +3,6 @@
 #include <bus.h>
 
 void stack_push(u8 data) {
-    printf("Stack push: %02X, Data: %02X\n", cpu_get_regs()->sp, data);
     cpu_get_regs()->sp--;
     bus_write(cpu_get_regs()->sp, data);
 }
@@ -14,7 +13,6 @@ void stack_push16(u16 data) {
 }
 
 u8 stack_pop() {
-    printf("Stack pop: %02X, Data: %02X\n", cpu_get_regs()->sp, bus_read(cpu_get_regs()->sp));
     return bus_read(cpu_get_regs()->sp++);
 }
 

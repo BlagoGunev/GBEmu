@@ -2,16 +2,28 @@
 #include <bus.h>
 #include <emu.h>
 #include <interrupts.h>
+#include <dbg.h>
+#include <timer.h>
 
 cpu_context ctx = {0};
 
 void cpu_init() {
     ctx.regs.pc = 0x100;
+    ctx.regs.sp = 0xFFFE;
+    *((short *)&ctx.regs.a) = 0xB001;
+    *((short *)&ctx.regs.b) = 0x1300;
+    *((short *)&ctx.regs.d) = 0xD800;
+    *((short *)&ctx.regs.h) = 0x4D01;
+    ctx.ie_register = 0;
+    ctx.int_flags = 0;
+    ctx.int_master_enabled = false;
+    ctx.enable_ime = false;
+
+    timer_get_ctx()->div = 0xABCC;
 }
 
 static void fetch_instruction() {
-    ctx.cur_opcode = bus_read(ctx.regs.pc);
-    ctx.regs.pc++;
+    ctx.cur_opcode = bus_read(ctx.regs.pc++);
     ctx.cur_inst = instruction_by_opcode(ctx.cur_opcode);
 }
 
@@ -33,6 +45,7 @@ bool cpu_step() {
         u16 pc = ctx.regs.pc;
 
         fetch_instruction();
+        emu_cycles(1);
         fetch_data();
 
         char flags[16];
@@ -51,6 +64,9 @@ bool cpu_step() {
             printf("Unknown instruction: %02X\n", ctx.cur_opcode);
             exit(-7);
         }
+
+        dbg_update();
+        dbg_print();
 
         execute();
     } else {
@@ -71,4 +87,8 @@ bool cpu_step() {
     }
 
     return true;
+}
+
+void cpu_request_interrupt(interrupt_type t) {
+    ctx.int_flags |= t;
 }

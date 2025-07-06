@@ -262,7 +262,7 @@ instruction instructions[0x100] = {
     [0xE6] = {INST_AND, AM_R_D8, RT_A},
     [0xE7] = {INST_RST, AM_IMP, RT_NONE, RT_NONE, CT_NONE, 0x20},
     [0xE8] = {INST_ADD, AM_R_D8, RT_SP},
-    [0xE9] = {INST_JP, AM_MR, RT_HL},
+    [0xE9] = {INST_JP, AM_R, RT_HL},
     [0xEA] = {INST_LD, AM_A16_R, RT_NONE, RT_A},
 
     [0xEE] = {INST_XOR, AM_R_D8, RT_A},

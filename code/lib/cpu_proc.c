@@ -57,11 +57,13 @@ static void proc_ld(cpu_context *ctx) {
         
         // if 16 bit register
         if (is_16_bit_reg(ctx->cur_inst->reg_2)) {
-            bus_write16(ctx->mem_dest, ctx->fetched_data);
             emu_cycles(1);
+            bus_write16(ctx->mem_dest, ctx->fetched_data);
         } else {
             bus_write(ctx->mem_dest, ctx->fetched_data);
         }
+
+        emu_cycles(1);
 
         return;
     }
@@ -73,7 +75,7 @@ static void proc_ld(cpu_context *ctx) {
             (ctx->fetched_data & 0xFF) >= 0x100;
         
         cpu_set_flags(ctx, 0, 0, hflag, cflag);
-        cpu_set_reg(ctx->cur_inst->reg_1, cpu_read_reg(ctx->cur_inst->reg_2) + (int8_t)ctx->fetched_data);
+        cpu_set_reg(ctx->cur_inst->reg_1, cpu_read_reg(ctx->cur_inst->reg_2) + (char)ctx->fetched_data);
         
         return;
     }
@@ -108,7 +110,7 @@ static void proc_jp(cpu_context *ctx) {
 }
 
 static void proc_jr(cpu_context *ctx) {
-    int8_t rel = (int8_t)(ctx->fetched_data & 0xFF);
+    int8_t rel = (char)(ctx->fetched_data & 0xFF);
     u16 addr = ctx->regs.pc + rel;
     goto_addr(ctx, addr, false);
 }
@@ -148,8 +150,8 @@ static void proc_cb(cpu_context *ctx) {
     u8 op = ctx->fetched_data;
     reg_type reg = decode_reg(op & 0x7);
     u8 reg_val = cpu_read_reg8(reg);
-    u8 bit = (op >> 3) & 0x3;
-    u8 bit_op = (op >> 6) & 0x3;
+    u8 bit = (op >> 3) & 0b111;
+    u8 bit_op = (op >> 6) & 0b11;
 
     emu_cycles(1);
 
@@ -160,7 +162,7 @@ static void proc_cb(cpu_context *ctx) {
     switch(bit_op) {
         case 1:
             // BIT
-            cpu_set_flags(ctx, !BIT(reg_val, 0), 0, 1, -1);
+            cpu_set_flags(ctx, !(reg_val & (1 << bit)), 0, 1, -1);
             return;
         case 2: 
             // RST
@@ -179,8 +181,14 @@ static void proc_cb(cpu_context *ctx) {
     switch (bit) {
         case 0: {
             // RLC
-            bool setC = BIT(reg_val, 7);
-            u8 result = ((reg_val << 1) & 0xFF) | setC;
+            bool setC = false;
+            u8 result = ((reg_val << 1) & 0xFF);
+
+            if ((reg_val & (1 << 7)) != 0) {
+                result |= 1;
+                setC = true;
+            }
+
             cpu_set_reg8(reg, result);
             cpu_set_flags(ctx, result == 0, 0, 0, setC);
         } return;
@@ -285,12 +293,11 @@ static void proc_rlca(cpu_context *ctx) {
 }
 
 static void proc_rrca(cpu_context *ctx) {
-    u8 u = ctx->regs.a;
-    bool c = u & 1;
-    u = (u >> 1) | (c << 7);
+    u8 b = ctx->regs.a & 1;
+    ctx->regs.a >>= 1;
+    ctx->regs.a |= (b << 7);
 
-    ctx->regs.a = u;
-    cpu_set_flags(ctx, 0, 0, 0, c);
+    cpu_set_flags(ctx, 0, 0, 0, b);
 }
 
 static void proc_rla(cpu_context *ctx) {
@@ -303,12 +310,13 @@ static void proc_rla(cpu_context *ctx) {
 }
 
 static void proc_rra(cpu_context *ctx) {
-    u8 u = ctx->regs.a;
-    u8 cf = CPU_FLAG_C;
-    u8 c = u & 1;
+    u8 carry = CPU_FLAG_C;
+    u8 new_c = ctx->regs.a & 1;
 
-    ctx->regs.a = (u >> 1) | (cf << 7);
-    cpu_set_flags(ctx, 0, 0, 0, c);
+    ctx->regs.a >>= 1;
+    ctx->regs.a |= (carry << 7);
+
+    cpu_set_flags(ctx, 0, 0, 0, new_c);
 }
 
 static void proc_stop(cpu_context *ctx) {
@@ -438,24 +446,24 @@ static void proc_adc(cpu_context *ctx) {
 static void proc_add(cpu_context *ctx) {
     u32 val = cpu_read_reg(ctx->cur_inst->reg_1) + ctx->fetched_data;
 
-    bool is_16_bit = is_16_bit_reg(ctx->cur_inst->reg_1);
+    bool is_16bit = is_16_bit_reg(ctx->cur_inst->reg_1);
 
-    if (is_16_bit) {
+    if (is_16bit) {
         emu_cycles(1);
     }
 
     if (ctx->cur_inst->reg_1 == RT_SP) {
-        val = cpu_read_reg(RT_SP) + (char)ctx->fetched_data;
+        val = cpu_read_reg(ctx->cur_inst->reg_1) + (char)ctx->fetched_data;
     }
 
     int z = (val & 0xFF) == 0;
     int h = (cpu_read_reg(ctx->cur_inst->reg_1) & 0xF) + (ctx->fetched_data & 0xF) >= 0x10;
     int c = (int)(cpu_read_reg(ctx->cur_inst->reg_1) & 0xFF) + (int)(ctx->fetched_data & 0xFF) >= 0x100;
 
-    if (is_16_bit) {
+    if (is_16bit) {
         z = -1;
         h = (cpu_read_reg(ctx->cur_inst->reg_1) & 0xFFF) + (ctx->fetched_data & 0xFFF) >= 0x1000;
-        u32 n = (u32)(cpu_read_reg(ctx->cur_inst->reg_1) & 0xFFFF) + (u32)(ctx->fetched_data & 0xFFFF);
+        u32 n = ((u32)cpu_read_reg(ctx->cur_inst->reg_1)) + ((u32)ctx->fetched_data);
         c = n >= 0x10000;
     }
 
@@ -473,7 +481,7 @@ static void proc_sub(cpu_context *ctx) {
     u16 val = cpu_read_reg(ctx->cur_inst->reg_1) - ctx->fetched_data;
 
     int z = val == 0;
-    int h = ((int)(cpu_read_reg(ctx->cur_inst->reg_1) & 0xF)) - ((int)(ctx->fetched_data & 0xF)) < 0;
+    int h = ((int)cpu_read_reg(ctx->cur_inst->reg_1) & 0xF) - ((int)ctx->fetched_data & 0xF) < 0;
     int c = ((int)cpu_read_reg(ctx->cur_inst->reg_1)) - ((int)ctx->fetched_data) < 0;
 
     cpu_set_reg(ctx->cur_inst->reg_1, val);
@@ -484,8 +492,8 @@ static void proc_sbc(cpu_context *ctx) {
     u8 val = ctx->fetched_data + CPU_FLAG_C;
 
     int z = cpu_read_reg(ctx->cur_inst->reg_1) - val == 0;
-    int h = ((int)(cpu_read_reg(ctx->cur_inst->reg_1) & 0xF)) 
-        - ((int)(ctx->fetched_data & 0xF)) - ((int)CPU_FLAG_C) < 0;
+    int h = ((int)cpu_read_reg(ctx->cur_inst->reg_1) & 0xF) 
+        - ((int)ctx->fetched_data & 0xF) - ((int)CPU_FLAG_C) < 0;
     int c = ((int)cpu_read_reg(ctx->cur_inst->reg_1)) 
         - ((int)ctx->fetched_data) - ((int)CPU_FLAG_C) < 0;
 
@@ -493,7 +501,7 @@ static void proc_sbc(cpu_context *ctx) {
     cpu_set_flags(ctx, z, 1, h, c); 
 }
 
-void cpu_set_flags(cpu_context *ctx, char z, char n, char h, char c) {
+void cpu_set_flags(cpu_context *ctx, int8_t z, int8_t n, int8_t h, int8_t c) {
     if (z != -1) {
         BIT_SET(ctx->regs.f, 7, z);
     }
