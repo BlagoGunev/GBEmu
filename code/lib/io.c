@@ -1,6 +1,7 @@
 #include <io.h>
 #include <cpu.h>
 #include <timer.h>
+#include <dma.h>
 
 static char serial_data[2];
 
@@ -22,7 +23,7 @@ u8 io_read(u16 address) {
         return cpu_get_int_flags();
     }
 
-    printf("UNSUPPORTED bus_read(%04X)\n", address);
+    printf("UNSUPPORTED io_read(%04X)\n", address);
     return 0;
 }
 
@@ -43,10 +44,15 @@ void io_write(u16 address, u8 value){
         return;
     }
 
+    if (address == 0xFF46) {
+        dma_start(value);
+        printf("DMA Start");
+    }
+
     if (address == 0xFF0F) {
         cpu_set_int_flags(value);
         return;
     }
 
-    printf("UNSUPPORTED bus_write(%04X)\n", address);
+    printf("UNSUPPORTED io_write(%04X)\n", address);
 }

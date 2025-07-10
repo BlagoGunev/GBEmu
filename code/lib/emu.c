@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <timer.h>
+#include <dma.h>
 
 /* 
   Emu components:
@@ -72,16 +73,21 @@ int emu_run(int argc, char **argv) {
     while (!ctx.die) {
         usleep(1000);
         ui_handle_events();
+
+        ui_update();
     }
 
     return 0;
 }
 
 void emu_cycles(int cpu_cycles) {
-    int n = cpu_cycles * 4;
 
-    for (int i = 0; i < n; i++) {
-        ctx.ticks++;
-        timer_tick();
+    for (int cycle = 0; cycle < cpu_cycles; cycle++) {
+        for (int timer_i = 0; timer_i < 4; timer_i++) {
+            ctx.ticks++;
+            timer_tick();
+        }
+
+        dma_tick();
     }
 }
