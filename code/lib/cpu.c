@@ -5,6 +5,8 @@
 #include <dbg.h>
 #include <timer.h>
 
+#define CPU_DBG 0
+
 cpu_context ctx = {0};
 
 void cpu_init() {
@@ -48,6 +50,7 @@ bool cpu_step() {
         emu_cycles(1);
         fetch_data();
 
+#if CPU_DBG == 1
         char flags[16];
         sprintf(flags, "%c%c%c%c", 
             ctx.regs.f & (1 << 7) ? 'Z' : '-',
@@ -59,7 +62,7 @@ bool cpu_step() {
         printf("Ticks: %lld\nExecuting: %02X,   PC: %04X, Data (%02X %02X), Fetched: %04X\n\tA: %02X, F: %s, BC: %02X%02X, DE: %02X%02X, HL: %02X%02X\n", 
             emu_get_context()->ticks, ctx.cur_opcode, pc, bus_read(pc+1), bus_read(pc+2), 
             ctx.fetched_data, ctx.regs.a, flags, ctx.regs.b, ctx.regs.c, ctx.regs.d, ctx.regs.e, ctx.regs.h, ctx.regs.l);
-        
+#endif
         if (ctx.cur_inst == NULL) {
             printf("Unknown instruction: %02X\n", ctx.cur_opcode);
             exit(-7);
