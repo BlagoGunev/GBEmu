@@ -118,6 +118,10 @@ void ui_handle_events() {
     }
 }
 
+u32 get_ticks() {
+    return SDL_GetTicks();
+}
+
 void delay(u32 ms) {
     SDL_Delay(ms);
 }
