@@ -7,6 +7,39 @@ static const int TICKS_PER_LINE = 456;
 static const int YRES = 144;
 static const int XRES = 160;
 
+typedef enum {
+    FS_TILE,
+    FS_DATAL,
+    FS_DATAH,
+    FS_IDLE,
+    FS_PUSH
+} pixel_fetcher_state;
+
+typedef struct _fifo_node {
+    struct _fifo_node *next;
+    u32 value;
+} fifo_node;
+
+typedef struct {
+    fifo_node *head;
+    fifo_node *tail;
+    u32 size;
+} fifo;
+
+typedef struct {
+    pixel_fetcher_state cur_state;
+    fifo pixel_fifo;
+    u8 line_x;
+    u8 pushed_x;
+    u8 fetch_x;
+    u8 bgw_fetch_data[3];
+    u8 fetch_entry_data[3];
+    u8 map_y;
+    u8 map_x;
+    u8 tile_y;
+    u8 fifo_x;
+} pixel_fetcher_context;
+
 /*
     Bit 7: Priority: 0 = No, 1 = BG and Window color indices 1–3 are drawn over this OBJ
     Bit 6: Y flip: 0 = Normal, 1 = Entire OBJ is vertically mirrored
@@ -31,6 +64,8 @@ typedef struct {
 typedef struct {
     oam_entry oam_ram[40];
     u8 vram[0x2000];
+
+    pixel_fetcher_context pfc;
 
     u32 current_frame;
     u32 line_ticks;

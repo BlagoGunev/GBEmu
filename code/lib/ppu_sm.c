@@ -20,11 +20,20 @@ void increment_ly() {
 void ppu_oam() {
     if (ppu_get_context()->line_ticks >= 80) {
         LCDSTAT_MODE_SET(MODE_XFER);
+
+        ppu_get_context()->pfc.cur_state = FS_TILE;
+        ppu_get_context()->pfc.line_x = 0;
+        ppu_get_context()->pfc.pushed_x = 0;
+        ppu_get_context()->pfc.fetch_x = 0;
+        ppu_get_context()->pfc.pixel_fifo.size = 0;
     }
 }
 
 void ppu_xfer() {
-    if (ppu_get_context()->line_ticks >= 80 + 172) {
+    pipeline_process();
+
+    if (ppu_get_context()->pfc.pushed_x >= XRES) {
+        pipeline_fifo_reset();
         LCDSTAT_MODE_SET(MODE_HBLANK);
     }
 }

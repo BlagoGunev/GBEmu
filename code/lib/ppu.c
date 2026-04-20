@@ -10,6 +10,14 @@ void ppu_init() {
     ctx.line_ticks = 0;
     ctx.video_buffer = malloc(YRES * XRES * sizeof(u32));
 
+    ctx.pfc.line_x = 0;
+    ctx.pfc.pushed_x = 0;
+    ctx.pfc.fetch_x = 0;
+    ctx.pfc.pixel_fifo.size = 0;
+    ctx.pfc.pixel_fifo.head = NULL;
+    ctx.pfc.pixel_fifo.tail = NULL;
+    ctx.pfc.cur_state = FS_TILE;
+
     lcd_init();
     LCDSTAT_MODE_SET(MODE_OAM);
 
